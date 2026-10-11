@@ -1,6 +1,10 @@
 package com.example.gestionsolicitudes.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.gestionsolicitudes.data.local.AppDatabase
+import com.example.gestionsolicitudes.data.repository.SolicitudRepository
 import com.example.gestionsolicitudes.model.Categoria
 import com.example.gestionsolicitudes.model.ErroresSolicitud
 import com.example.gestionsolicitudes.model.EstadoSolicitud
@@ -15,10 +19,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-class SolicitudViewModel : ViewModel() {
+class SolicitudViewModel(app: Application) : AndroidViewModel(app) {
+
+    // Room: la pantalla nunca toca la base de datos, solo este ViewModel (vía repositorio)
+    private val db = AppDatabase.getDatabase(app)
+    private val repositorio = SolicitudRepository(db.solicitudDao(), db.usuarioDao())
 
     private val _estado = MutableStateFlow(SolicitudUiState())
     val estado: StateFlow<SolicitudUiState> = _estado.asStateFlow()
@@ -27,9 +36,20 @@ class SolicitudViewModel : ViewModel() {
     val evidenciasFicticias = listOf("captura_error_demo.png", "documento_demo.pdf")
 
     // Sirve para generar el código SOL-0001, SOL-0002, etc.
+    // Se pone al día con lo que hay guardado en la base de datos
     private var contador = 0
 
     private val formatoFecha = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+
+    init {
+        // Cada vez que cambia la tabla, el estado de la UI se actualiza solo
+        viewModelScope.launch {
+            repositorio.solicitudes.collect { lista ->
+                contador = maxOf(contador, lista.size)
+                _estado.update { it.copy(solicitudes = lista) }
+            }
+        }
+    }
 
     // Actualiza el título y limpia su error
     fun onTituloChange(nuevoTitulo: String) {
@@ -138,6 +158,8 @@ class SolicitudViewModel : ViewModel() {
                 codigoSeleccionado = codigo
             )
         }
+        // Persistir en Room (la solicitud ya se ve en pantalla; esto la deja guardada)
+        viewModelScope.launch { repositorio.guardar(nueva) }
         return codigo
     }
 
@@ -238,6 +260,10 @@ class SolicitudViewModel : ViewModel() {
                     }
                 }
             )
+        }
+        // Persistir en Room la solicitud ya modificada (con su evento nuevo en el historial)
+        buscar(codigo)?.let { actualizada ->
+            viewModelScope.launch { repositorio.guardar(actualizada) }
         }
     }
 
