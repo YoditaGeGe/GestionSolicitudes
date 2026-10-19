@@ -1,6 +1,5 @@
 package com.example.gestionsolicitudes.model
 
-// Estados mínimos que pide el caso
 enum class EstadoSolicitud(val etiqueta: String) {
     RECIBIDA("Recibida"),
     EN_REVISION("En revisión"),
@@ -12,7 +11,6 @@ enum class EstadoSolicitud(val etiqueta: String) {
     CANCELADA("Cancelada")
 }
 
-// Prioridades sugeridas por el caso
 enum class Prioridad(val etiqueta: String) {
     BAJA("Baja"),
     MEDIA("Media"),
@@ -20,7 +18,6 @@ enum class Prioridad(val etiqueta: String) {
     URGENTE("Urgente")
 }
 
-// Categorías sugeridas por el caso
 enum class Categoria(val etiqueta: String) {
     DESARROLLO_WEB("Desarrollo web"),
     MANTENIMIENTO_WEB("Mantenimiento web"),
@@ -34,7 +31,6 @@ enum class Categoria(val etiqueta: String) {
     OTRO("Otro requerimiento")
 }
 
-// Cada cambio queda registrado aquí (trazabilidad)
 data class EventoHistorial(
     val id: String,
     val estadoAnterior: EstadoSolicitud?,
@@ -65,7 +61,6 @@ data class Solicitud(
     val fechaActualizacion: String,
     val historial: List<EventoHistorial> = emptyList()
 ) {
-    // Mientras esté abierta, el administrador puede gestionarla
     val estaAbierta: Boolean
         get() = estado != EstadoSolicitud.RESUELTA &&
                 estado != EstadoSolicitud.CERRADA &&

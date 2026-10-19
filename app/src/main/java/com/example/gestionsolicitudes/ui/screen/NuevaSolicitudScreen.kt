@@ -16,6 +16,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -37,6 +38,16 @@ fun NuevaSolicitudScreen(
     val form = estado.formulario
     val usuario = loginEstado.usuarioActual
 
+    LaunchedEffect(estado.esperandoDetalle, estado.solicitudes) {
+        val codigo = estado.codigoSeleccionado
+        if (estado.esperandoDetalle && codigo != null && estado.solicitudes.any { it.codigo == codigo }) {
+            solicitudViewModel.detalleAbierto()
+            navController.navigate("detalle") {
+                popUpTo("cliente")
+            }
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -46,7 +57,6 @@ fun NuevaSolicitudScreen(
     ) {
         Text("Nueva solicitud", style = MaterialTheme.typography.headlineMedium)
 
-        // Campo título
         OutlinedTextField(
             value = form.titulo,
             onValueChange = solicitudViewModel::onTituloChange,
@@ -60,7 +70,6 @@ fun NuevaSolicitudScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        // Campo descripción
         OutlinedTextField(
             value = form.descripcion,
             onValueChange = solicitudViewModel::onDescripcionChange,
@@ -75,7 +84,6 @@ fun NuevaSolicitudScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        // Campo servicio o sitio relacionado (opcional)
         OutlinedTextField(
             value = form.servicio,
             onValueChange = solicitudViewModel::onServicioChange,
@@ -83,7 +91,6 @@ fun NuevaSolicitudScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        // Categoría: una opción marcada a la vez (RadioButton)
         Text("Categoría", style = MaterialTheme.typography.titleMedium)
         Categoria.entries.forEach { categoria ->
             Row(
@@ -103,7 +110,6 @@ fun NuevaSolicitudScreen(
             Text(text = it, color = MaterialTheme.colorScheme.error)
         }
 
-        // Evidencia ficticia
         Text("Evidencia (archivo ficticio)", style = MaterialTheme.typography.titleMedium)
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -132,22 +138,18 @@ fun NuevaSolicitudScreen(
             }
         }
 
-        // Botón: enviar
         Button(
             onClick = {
-                val codigo = if (usuario != null) solicitudViewModel.enviarSolicitud(usuario) else null
-                if (codigo != null) {
-                    navController.navigate("detalle") {
-                        popUpTo("cliente")
-                    }
+                if (usuario != null) {
+                    solicitudViewModel.enviarSolicitud(usuario)
                 }
             },
+            enabled = usuario != null && !estado.guardando,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Enviar solicitud")
+            Text(if (estado.guardando) "Guardando..." else "Enviar solicitud")
         }
 
-        // Botón: cancelar
         OutlinedButton(
             onClick = { navController.popBackStack() },
             modifier = Modifier.fillMaxWidth()

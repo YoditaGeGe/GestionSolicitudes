@@ -28,7 +28,6 @@ import com.example.gestionsolicitudes.model.Prioridad
 import com.example.gestionsolicitudes.viewmodel.LoginViewModel
 import com.example.gestionsolicitudes.viewmodel.SolicitudViewModel
 
-// Pantalla principal del administrador: ve TODAS las solicitudes, con búsqueda y filtros.
 @Composable
 fun InicioAdminScreen(
     navController: NavController,
@@ -50,7 +49,13 @@ fun InicioAdminScreen(
         Text("Panel del administrador", style = MaterialTheme.typography.headlineMedium)
         Text("Bienvenido/a, ${usuario?.nombre ?: ""}")
 
-        // Búsqueda por código o título
+        Button(
+            onClick = { navController.navigate("escanear_qr") },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Escanear código QR")
+        }
+
         OutlinedTextField(
             value = estado.busqueda,
             onValueChange = solicitudViewModel::onBusquedaChange,
@@ -58,32 +63,46 @@ fun InicioAdminScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        // Filtros: cada botón pasa a la siguiente opción al tocarlo
-        Text("Filtros (toca para cambiar)", style = MaterialTheme.typography.titleMedium)
-        OutlinedButton(
-            onClick = { solicitudViewModel.cambiarFiltroEstado() },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Estado: ${estado.filtroEstado?.etiqueta ?: "Todos"}")
+        Text("Estado", style = MaterialTheme.typography.titleMedium)
+        OpcionFiltro("Todos", estado.filtroEstado == null) {
+            solicitudViewModel.onFiltroEstado(null)
         }
-        OutlinedButton(
-            onClick = { solicitudViewModel.cambiarFiltroPrioridad() },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Prioridad: ${estado.filtroPrioridad?.etiqueta ?: "Todas"}")
+        EstadoSolicitud.entries.forEach { opcion ->
+            OpcionFiltro(opcion.etiqueta, estado.filtroEstado == opcion) {
+                solicitudViewModel.onFiltroEstado(opcion)
+            }
         }
-        OutlinedButton(
-            onClick = { solicitudViewModel.cambiarFiltroCliente() },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Cliente: ${estado.filtroCliente ?: "Todos"}")
+
+        Text("Prioridad", style = MaterialTheme.typography.titleMedium)
+        OpcionFiltro("Todas", estado.filtroPrioridad == null) {
+            solicitudViewModel.onFiltroPrioridad(null)
         }
-        OutlinedButton(
-            onClick = { solicitudViewModel.cambiarFiltroResponsable() },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Responsable: ${estado.filtroResponsable ?: "Todos"}")
+        Prioridad.entries.forEach { opcion ->
+            OpcionFiltro(opcion.etiqueta, estado.filtroPrioridad == opcion) {
+                solicitudViewModel.onFiltroPrioridad(opcion)
+            }
         }
+
+        Text("Cliente", style = MaterialTheme.typography.titleMedium)
+        OpcionFiltro("Todos", estado.filtroCliente == null) {
+            solicitudViewModel.onFiltroCliente(null)
+        }
+        estado.solicitudes.map { it.clienteNombre }.distinct().forEach { nombre ->
+            OpcionFiltro(nombre, estado.filtroCliente == nombre) {
+                solicitudViewModel.onFiltroCliente(nombre)
+            }
+        }
+
+        Text("Responsable", style = MaterialTheme.typography.titleMedium)
+        OpcionFiltro("Todos", estado.filtroResponsable == null) {
+            solicitudViewModel.onFiltroResponsable(null)
+        }
+        estado.solicitudes.mapNotNull { it.responsable }.distinct().forEach { nombre ->
+            OpcionFiltro(nombre, estado.filtroResponsable == nombre) {
+                solicitudViewModel.onFiltroResponsable(nombre)
+            }
+        }
+
         OutlinedButton(
             onClick = { solicitudViewModel.limpiarFiltros() },
             modifier = Modifier.fillMaxWidth()
@@ -129,7 +148,6 @@ fun InicioAdminScreen(
     }
 }
 
-// Detalle para el administrador: puede definir prioridad, asignar técnico, pedir información o cancelar.
 @Composable
 fun AdminDetalleScreen(
     navController: NavController,
@@ -174,7 +192,6 @@ fun AdminDetalleScreen(
                     modifier = Modifier.padding(top = 8.dp)
                 )
 
-                // Pasar a revisión (solo si recién llegó)
                 if (solicitud.estado == EstadoSolicitud.RECIBIDA) {
                     Button(
                         onClick = { solicitudViewModel.pasarARevision(solicitud.codigo, admin) },
@@ -184,7 +201,6 @@ fun AdminDetalleScreen(
                     }
                 }
 
-                // Prioridad: una opción marcada a la vez
                 Text("Prioridad", style = MaterialTheme.typography.titleMedium)
                 Prioridad.entries.forEach { prioridad ->
                     Row(
@@ -205,9 +221,8 @@ fun AdminDetalleScreen(
                     }
                 }
 
-                // Responsable: asignar o reasignar a un técnico
                 Text("Asignar responsable (técnico)", style = MaterialTheme.typography.titleMedium)
-                loginViewModel.tecnicos.forEach { tecnico ->
+                loginEstado.tecnicos.forEach { tecnico ->
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
@@ -226,7 +241,6 @@ fun AdminDetalleScreen(
                     }
                 }
 
-                // Comentario: sirve para pedir información o para el motivo de cancelación
                 OutlinedTextField(
                     value = estado.comentarioAdmin,
                     onValueChange = solicitudViewModel::onComentarioAdminChange,
@@ -279,5 +293,18 @@ fun AdminDetalleScreen(
         ) {
             Text("Volver")
         }
+    }
+}
+
+@Composable
+private fun OpcionFiltro(texto: String, marcada: Boolean, alElegir: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { alElegir() }
+    ) {
+        RadioButton(selected = marcada, onClick = alElegir)
+        Text(texto)
     }
 }

@@ -28,7 +28,6 @@ abstract class AppDatabase : RoomDatabase() {
                     "gestion_solicitudes.db"
                 )
                     .addCallback(object : Callback() {
-                        // Se ejecuta solo la primera vez que se crea la BD: cuentas ficticias del caso
                         override fun onCreate(db: SupportSQLiteDatabase) {
                             super.onCreate(db)
                             db.execSQL("INSERT INTO usuarios VALUES ('U1','Camila Cliente','cliente@demo.cl','123456','CLIENTE','Pyme Demo SpA')")

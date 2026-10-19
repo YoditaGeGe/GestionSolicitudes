@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 abstract class SolicitudDao {
 
-    // Flow: la UI se actualiza sola cada vez que cambia la tabla
     @Transaction
     @Query("SELECT * FROM solicitudes ORDER BY codigo ASC")
     abstract fun observarTodas(): Flow<List<SolicitudConHistorial>>
@@ -21,14 +20,12 @@ abstract class SolicitudDao {
     @Query("SELECT COUNT(*) FROM eventos_historial WHERE solicitudCodigo = :codigo")
     abstract suspend fun contarEventos(codigo: String): Int
 
-    // @Upsert = inserta si no existe, actualiza si existe (no dispara el CASCADE del historial)
     @Upsert
     abstract suspend fun guardarSolicitud(solicitud: SolicitudEntity)
 
     @Insert
     abstract suspend fun insertarEventos(eventos: List<EventoHistorialEntity>)
 
-    // Solicitud y eventos nuevos se guardan juntos o no se guarda nada
     @Transaction
     open suspend fun guardarConEventos(
         solicitud: SolicitudEntity,

@@ -22,9 +22,6 @@ import androidx.navigation.NavController
 import com.example.gestionsolicitudes.viewmodel.LoginViewModel
 import com.example.gestionsolicitudes.viewmodel.SolicitudViewModel
 
-// REEMPLAZA el InicioScreens.kt anterior.
-// El cliente ve SOLO sus solicitudes y puede crear una nueva.
-
 @Composable
 fun InicioClienteScreen(
     navController: NavController,
@@ -35,7 +32,6 @@ fun InicioClienteScreen(
     val estado by solicitudViewModel.estado.collectAsState()
     val usuario = loginEstado.usuarioActual
 
-    // El cliente solo puede ver sus propias solicitudes (lo pide el caso)
     val misSolicitudes = estado.solicitudes
         .filter { it.clienteId == usuario?.id }
         .reversed()
@@ -56,6 +52,13 @@ fun InicioClienteScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Nueva solicitud")
+        }
+
+        Button(
+            onClick = { navController.navigate("escanear_qr") },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Escanear código QR")
         }
 
         Text("Mis solicitudes (${misSolicitudes.size})", style = MaterialTheme.typography.titleLarge)
@@ -94,8 +97,6 @@ fun InicioClienteScreen(
     }
 }
 
-// El administrador ahora está en AdminScreens.kt. El técnico sigue igual (lo llenamos en el paso 5)
-
 @Composable
 fun InicioTecnicoScreen(navController: NavController, viewModel: LoginViewModel) {
     InicioBase("Panel del técnico", navController, viewModel)
@@ -114,6 +115,13 @@ private fun InicioBase(
         Text(titulo, style = MaterialTheme.typography.headlineMedium)
         Text("Bienvenido/a, ${usuario?.nombre ?: ""}")
         Text("Empresa: ${usuario?.empresa ?: ""}")
+
+        Button(
+            onClick = { navController.navigate("escanear_qr") },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Escanear código QR")
+        }
 
         Button(onClick = {
             viewModel.cerrarSesion()

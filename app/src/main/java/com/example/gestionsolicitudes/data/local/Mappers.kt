@@ -4,8 +4,6 @@ import com.example.gestionsolicitudes.model.EventoHistorial
 import com.example.gestionsolicitudes.model.Solicitud
 import com.example.gestionsolicitudes.model.Usuario
 
-// ---- Entity -> modelo (lo que usa la UI) ----
-
 fun UsuarioEntity.toModel() = Usuario(id, nombre, correo, clave, perfil, empresa)
 
 fun EventoHistorialEntity.toModel() = EventoHistorial(
@@ -38,8 +36,6 @@ fun SolicitudConHistorial.toModel() = Solicitud(
     fechaActualizacion = solicitud.fechaActualizacion,
     historial = eventos.sortedBy { it.pk }.map { it.toModel() }
 )
-
-// ---- modelo -> Entity (para guardar) ----
 
 fun Solicitud.toEntity() = SolicitudEntity(
     codigo = codigo,

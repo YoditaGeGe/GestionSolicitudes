@@ -10,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -26,6 +27,18 @@ fun LoginScreen(
 ) {
     val estado by viewModel.estado.collectAsState()
 
+    LaunchedEffect(estado.usuarioActual) {
+        val perfil = estado.usuarioActual?.perfil ?: return@LaunchedEffect
+        val ruta = when (perfil) {
+            Perfil.CLIENTE -> "cliente"
+            Perfil.ADMINISTRADOR -> "admin"
+            Perfil.TECNICO -> "tecnico"
+        }
+        navController.navigate(ruta) {
+            popUpTo("login") { inclusive = true }
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -34,7 +47,6 @@ fun LoginScreen(
     ) {
         Text("Gestión de solicitudes", style = MaterialTheme.typography.headlineMedium)
 
-        // Campo correo
         OutlinedTextField(
             value = estado.correo,
             onValueChange = viewModel::onCorreoChange,
@@ -48,7 +60,6 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        // Campo clave
         OutlinedTextField(
             value = estado.clave,
             onValueChange = viewModel::onClaveChange,
@@ -63,32 +74,17 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        // Error general (credenciales malas)
         estado.errores.general?.let {
             Text(text = it, color = MaterialTheme.colorScheme.error)
         }
 
-        // Botón: ingresar
         Button(
-            onClick = {
-                val perfil = viewModel.iniciarSesion()
-                if (perfil != null) {
-                    val ruta = when (perfil) {
-                        Perfil.CLIENTE -> "cliente"
-                        Perfil.ADMINISTRADOR -> "admin"
-                        Perfil.TECNICO -> "tecnico"
-                    }
-                    navController.navigate(ruta) {
-                        popUpTo("login") { inclusive = true }
-                    }
-                }
-            },
+            onClick = { viewModel.iniciarSesion() },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Ingresar")
         }
 
-        // Ayuda para la demo
         Text("Cuentas de prueba (clave 123456):", style = MaterialTheme.typography.labelLarge)
         Text("cliente@demo.cl · admin@demo.cl · tecnico@demo.cl")
     }

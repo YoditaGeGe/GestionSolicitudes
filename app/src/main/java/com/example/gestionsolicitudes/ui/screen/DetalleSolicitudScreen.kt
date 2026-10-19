@@ -31,7 +31,6 @@ fun DetalleSolicitudScreen(
     val estado by solicitudViewModel.estado.collectAsState()
     val solicitud = estado.solicitudes.find { it.codigo == estado.codigoSeleccionado }
 
-    // El context le permite a la pantalla abrir otras apps (WhatsApp)
     val context = LocalContext.current
 
     Column(
@@ -58,7 +57,6 @@ fun DetalleSolicitudScreen(
             Text("Última actualización: ${solicitud.fechaActualizacion}")
             Text("Descripción: ${solicitud.descripcion}")
 
-            // Botón: compartir por WhatsApp (abre WhatsApp con el mensaje ya escrito)
             Button(
                 onClick = {
                     val mensaje = solicitudViewModel.armarMensajeWhatsApp(solicitud)

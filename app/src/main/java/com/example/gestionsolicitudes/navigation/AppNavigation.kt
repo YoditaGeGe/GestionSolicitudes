@@ -12,15 +12,13 @@ import com.example.gestionsolicitudes.ui.screen.InicioClienteScreen
 import com.example.gestionsolicitudes.ui.screen.InicioTecnicoScreen
 import com.example.gestionsolicitudes.ui.screen.LoginScreen
 import com.example.gestionsolicitudes.ui.screen.NuevaSolicitudScreen
+import com.example.gestionsolicitudes.ui.screen.QrScannerRoute
 import com.example.gestionsolicitudes.viewmodel.LoginViewModel
 import com.example.gestionsolicitudes.viewmodel.SolicitudViewModel
 
-// REEMPLAZA el AppNavigation.kt anterior.
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
-
-    // Los ViewModels se crean una sola vez aquí, igual que en la Guía 11
     val loginViewModel: LoginViewModel = viewModel()
     val solicitudViewModel: SolicitudViewModel = viewModel()
 
@@ -35,5 +33,8 @@ fun AppNavigation() {
         composable("admin") { InicioAdminScreen(navController, loginViewModel, solicitudViewModel) }
         composable("admin_detalle") { AdminDetalleScreen(navController, loginViewModel, solicitudViewModel) }
         composable("tecnico") { InicioTecnicoScreen(navController, loginViewModel) }
+        composable("escanear_qr") {
+            QrScannerRoute(onVolver = { navController.popBackStack() })
+        }
     }
 }

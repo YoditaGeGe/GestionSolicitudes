@@ -1,6 +1,5 @@
 package com.example.gestionsolicitudes.model
 
-// Igual que UsuarioUiState de la Guía 11: campos del formulario + errores
 data class FormularioSolicitud(
     val titulo: String = "",
     val descripcion: String = "",
@@ -16,7 +15,6 @@ data class ErroresSolicitud(
     val categoria: String? = null
 )
 
-// Estado general: solicitudes, formulario, solicitud seleccionada, filtros y comentario del admin
 data class SolicitudUiState(
     val solicitudes: List<Solicitud> = emptyList(),
     val formulario: FormularioSolicitud = FormularioSolicitud(),
@@ -27,9 +25,10 @@ data class SolicitudUiState(
     val filtroCliente: String? = null,
     val filtroResponsable: String? = null,
     val comentarioAdmin: String = "",
-    val errorComentarioAdmin: String? = null
+    val errorComentarioAdmin: String? = null,
+    val guardando: Boolean = false,
+    val esperandoDetalle: Boolean = false
 ) {
-    // Devuelve las solicitudes que cumplen la búsqueda y todos los filtros (las más nuevas primero)
     fun solicitudesFiltradas(): List<Solicitud> {
         val texto = busqueda.trim()
         return solicitudes.filter { s ->

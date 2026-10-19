@@ -11,8 +11,6 @@ import com.example.gestionsolicitudes.model.EstadoSolicitud
 import com.example.gestionsolicitudes.model.Perfil
 import com.example.gestionsolicitudes.model.Prioridad
 
-// Room guarda los enum directamente (como texto), por eso no hacen falta TypeConverters.
-
 @Entity(tableName = "usuarios")
 data class UsuarioEntity(
     @PrimaryKey val id: String,
@@ -42,7 +40,6 @@ data class SolicitudEntity(
     val fechaActualizacion: String
 )
 
-// Una fila por cada cambio. Si se borra la solicitud, se borra su historial (CASCADE).
 @Entity(
     tableName = "eventos_historial",
     foreignKeys = [
@@ -56,8 +53,8 @@ data class SolicitudEntity(
     indices = [Index("solicitudCodigo")]
 )
 data class EventoHistorialEntity(
-    @PrimaryKey(autoGenerate = true) val pk: Long = 0, // sirve para mantener el orden cronológico
-    val id: String,                                    // "SOL-0001-E1", como en tu modelo
+    @PrimaryKey(autoGenerate = true) val pk: Long = 0,
+    val id: String,
     val solicitudCodigo: String,
     val estadoAnterior: EstadoSolicitud?,
     val estadoNuevo: EstadoSolicitud,
@@ -69,7 +66,6 @@ data class EventoHistorialEntity(
     val evidencia: String?
 )
 
-// Solicitud + todos sus eventos (relación 1 a muchos)
 data class SolicitudConHistorial(
     @Embedded val solicitud: SolicitudEntity,
     @Relation(parentColumn = "codigo", entityColumn = "solicitudCodigo")
