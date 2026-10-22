@@ -88,6 +88,15 @@ class SolicitudViewModel(app: Application) : AndroidViewModel(app) {
         _estado.update { it.copy(codigoSeleccionado = codigo) }
     }
 
+    fun seleccionarSiExiste(texto: String): Boolean {
+        val codigo = texto.trim()
+        val solicitud = _estado.value.solicitudes.find {
+            it.codigo.equals(codigo, ignoreCase = true)
+        } ?: return false
+        _estado.update { it.copy(codigoSeleccionado = solicitud.codigo) }
+        return true
+    }
+
     fun detalleAbierto() {
         _estado.update { it.copy(esperandoDetalle = false) }
     }
@@ -252,6 +261,36 @@ class SolicitudViewModel(app: Application) : AndroidViewModel(app) {
         )
     }
 
+    fun pasarAProceso(codigo: String, admin: Usuario) {
+        if (admin.perfil != Perfil.ADMINISTRADOR) return
+        val solicitud = buscar(codigo) ?: return
+        if (solicitud.estado != EstadoSolicitud.ASIGNADA) return
+        registrarCambio(
+            codigo, admin, EstadoSolicitud.EN_PROCESO,
+            "Pasó a en proceso", "Se comenzó el trabajo de la solicitud"
+        )
+    }
+
+    fun marcarResuelta(codigo: String, admin: Usuario) {
+        if (admin.perfil != Perfil.ADMINISTRADOR) return
+        val solicitud = buscar(codigo) ?: return
+        if (solicitud.estado != EstadoSolicitud.EN_PROCESO) return
+        registrarCambio(
+            codigo, admin, EstadoSolicitud.RESUELTA,
+            "Solicitud resuelta", "El trabajo quedó terminado"
+        )
+    }
+
+    fun cerrarSolicitud(codigo: String, admin: Usuario) {
+        if (admin.perfil != Perfil.ADMINISTRADOR) return
+        val solicitud = buscar(codigo) ?: return
+        if (solicitud.estado != EstadoSolicitud.RESUELTA) return
+        registrarCambio(
+            codigo, admin, EstadoSolicitud.CERRADA,
+            "Solicitud cerrada", "Se cerró la solicitud resuelta"
+        )
+    }
+
     fun definirPrioridad(codigo: String, prioridad: Prioridad, admin: Usuario) {
         if (admin.perfil != Perfil.ADMINISTRADOR) return
         val solicitud = buscar(codigo) ?: return
@@ -331,13 +370,5 @@ class SolicitudViewModel(app: Application) : AndroidViewModel(app) {
 
         _estado.update { it.copy(comentarioAdmin = "", errorComentarioAdmin = null) }
         return true
-    }
-
-    fun armarMensajeWhatsApp(solicitud: Solicitud): String {
-        return "Hola, registré una solicitud de soporte.\n\n" +
-                "Código: ${solicitud.codigo}\n" +
-                "Título: ${solicitud.titulo}\n" +
-                "Categoría: ${solicitud.categoria.etiqueta}\n" +
-                "Seguimiento: https://seguimiento.demo.cl/${solicitud.codigo}"
     }
 }

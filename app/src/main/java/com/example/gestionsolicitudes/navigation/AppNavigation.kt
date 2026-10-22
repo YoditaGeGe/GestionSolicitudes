@@ -12,6 +12,7 @@ import com.example.gestionsolicitudes.ui.screen.InicioClienteScreen
 import com.example.gestionsolicitudes.ui.screen.InicioTecnicoScreen
 import com.example.gestionsolicitudes.ui.screen.LoginScreen
 import com.example.gestionsolicitudes.ui.screen.NuevaSolicitudScreen
+import com.example.gestionsolicitudes.model.Perfil
 import com.example.gestionsolicitudes.ui.screen.QrScannerRoute
 import com.example.gestionsolicitudes.viewmodel.LoginViewModel
 import com.example.gestionsolicitudes.viewmodel.SolicitudViewModel
@@ -34,7 +35,20 @@ fun AppNavigation() {
         composable("admin_detalle") { AdminDetalleScreen(navController, loginViewModel, solicitudViewModel) }
         composable("tecnico") { InicioTecnicoScreen(navController, loginViewModel) }
         composable("escanear_qr") {
-            QrScannerRoute(onVolver = { navController.popBackStack() })
+            QrScannerRoute(
+                onVolver = { navController.popBackStack() },
+                onCodigoLeido = { texto ->
+                    val abrio = solicitudViewModel.seleccionarSiExiste(texto)
+                    if (abrio) {
+                        val perfil = loginViewModel.estado.value.usuarioActual?.perfil
+                        val ruta = if (perfil == Perfil.ADMINISTRADOR) "admin_detalle" else "detalle"
+                        navController.navigate(ruta) {
+                            popUpTo("escanear_qr") { inclusive = true }
+                        }
+                    }
+                    abrio
+                }
+            )
         }
     }
 }

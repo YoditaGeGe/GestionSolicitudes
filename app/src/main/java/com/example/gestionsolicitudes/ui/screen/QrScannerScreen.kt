@@ -44,7 +44,10 @@ import com.example.gestionsolicitudes.utils.QrScanner
 import com.example.gestionsolicitudes.viewmodel.QrViewModel
 
 @Composable
-fun QrScannerRoute(onVolver: () -> Unit) {
+fun QrScannerRoute(
+    onVolver: () -> Unit,
+    onCodigoLeido: (String) -> Boolean
+) {
     val context = LocalContext.current
     val viewModel: QrViewModel = viewModel()
     var tienePermiso by remember {
@@ -89,7 +92,8 @@ fun QrScannerRoute(onVolver: () -> Unit) {
         viewModel = viewModel,
         tienePermiso = tienePermiso,
         onPedirPermiso = { pedirPermiso.launch(Manifest.permission.CAMERA) },
-        onVolver = onVolver
+        onVolver = onVolver,
+        onCodigoLeido = onCodigoLeido
     )
 }
 
@@ -98,7 +102,8 @@ fun QrScannerScreen(
     viewModel: QrViewModel,
     tienePermiso: Boolean,
     onPedirPermiso: () -> Unit,
-    onVolver: () -> Unit
+    onVolver: () -> Unit,
+    onCodigoLeido: (String) -> Boolean
 ) {
     val resultado by viewModel.resultado.collectAsState()
     val context = LocalContext.current
@@ -152,9 +157,16 @@ fun QrScannerScreen(
                     ) {
                         QrScanner(
                             alDetectar = { texto ->
-                                viewModel.alDetectarQr(texto)
-                                escaneando = false
-                                Toast.makeText(context, "QR detectado", Toast.LENGTH_SHORT).show()
+                                val abrio = onCodigoLeido(texto)
+                                if (!abrio) {
+                                    viewModel.alDetectarQr(texto)
+                                    escaneando = false
+                                    Toast.makeText(
+                                        context,
+                                        "Ese QR no corresponde a una solicitud",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
                             },
                             modifier = Modifier.fillMaxSize()
                         )
@@ -180,7 +192,8 @@ fun QrScannerScreen(
                         .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text("QR detectado", style = MaterialTheme.typography.titleMedium)
+                    Text("No hay una solicitud con ese código", style = MaterialTheme.typography.titleMedium)
+                    Text("QR leído", style = MaterialTheme.typography.titleMedium)
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(

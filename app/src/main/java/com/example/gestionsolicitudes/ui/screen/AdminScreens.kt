@@ -200,6 +200,22 @@ fun AdminDetalleScreen(
                         Text("Pasar a revisión")
                     }
                 }
+                if (solicitud.estado == EstadoSolicitud.ASIGNADA) {
+                    Button(
+                        onClick = { solicitudViewModel.pasarAProceso(solicitud.codigo, admin) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Marcar en proceso")
+                    }
+                }
+                if (solicitud.estado == EstadoSolicitud.EN_PROCESO) {
+                    Button(
+                        onClick = { solicitudViewModel.marcarResuelta(solicitud.codigo, admin) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Marcar resuelta")
+                    }
+                }
 
                 Text("Prioridad", style = MaterialTheme.typography.titleMedium)
                 Prioridad.entries.forEach { prioridad ->
@@ -264,6 +280,18 @@ fun AdminDetalleScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Cancelar solicitud")
+                }
+            } else if (solicitud.estado == EstadoSolicitud.RESUELTA) {
+                Text(
+                    "La solicitud está resuelta",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+                Button(
+                    onClick = { solicitudViewModel.cerrarSolicitud(solicitud.codigo, admin) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Cerrar solicitud")
                 }
             } else {
                 Text("Esta solicitud está ${solicitud.estado.etiqueta.lowercase()} y ya no admite cambios del administrador.")
