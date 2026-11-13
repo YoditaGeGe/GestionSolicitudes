@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -69,28 +70,25 @@ fun InicioAdminScreen(
             Text("Escanear código QR", fontWeight = FontWeight.SemiBold)
         }
 
-        PrettyCard {
-            Text(
-                "API de prueba (Guía 14)",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.SemiBold
-            )
-            Text(
-                "Abre una lista de posts de ejemplo traídos desde internet (JSONPlaceholder). Sirve para probar GET, POST, PUT y DELETE.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Button(
-                onClick = { navController.navigate("posts") },
-                shape = RoundedCornerShape(14.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-            ) {
-                Text("Ver lista de posts (API demo)", fontWeight = FontWeight.SemiBold)
-            }
+        Button(
+            onClick = { navController.navigate("posts") },
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = MaterialTheme.colorScheme.onSecondary
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp)
+        ) {
+            Text("API demo · Posts (GET/POST/PUT/DELETE)", fontWeight = FontWeight.SemiBold)
         }
+
+        Text(
+            "Datos de prueba desde internet (JSONPlaceholder). No son solicitudes reales.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
 
         PrettyCard {
             SoftFieldAdmin(
