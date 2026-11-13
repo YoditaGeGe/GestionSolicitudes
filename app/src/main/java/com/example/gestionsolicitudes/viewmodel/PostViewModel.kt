@@ -9,18 +9,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 // ViewModel que mantiene el estado de los datos obtenidos
-class PostViewModel : ViewModel() {
+open class PostViewModel : ViewModel() {
 
     private val repository = PostRepository()
 
     // Flujo mutable que contiene la lista de posts
-    private val _postList = MutableStateFlow<List<Post>>(value = emptyList())
+    protected val _postList = MutableStateFlow<List<Post>>(value = emptyList())
 
     // Flujo público de solo lectura
-    val postList: StateFlow<List<Post>> = _postList
+    open val postList: StateFlow<List<Post>> = _postList
 
     private val _mensaje = MutableStateFlow<String?>(null)
-    val mensaje: StateFlow<String?> = _mensaje
+    open val mensaje: StateFlow<String?> = _mensaje
 
     // Se llama automáticamente al iniciar
     init {
@@ -28,7 +28,7 @@ class PostViewModel : ViewModel() {
     }
 
     // Función que obtiene los datos en segundo plano
-    private fun fetchPosts() {
+    open fun fetchPosts() {
         viewModelScope.launch {
             try {
                 _postList.value = repository.getPosts()
