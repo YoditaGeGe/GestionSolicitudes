@@ -70,6 +70,29 @@ fun InicioAdminScreen(
         }
 
         PrettyCard {
+            Text(
+                "API de prueba (Guía 14)",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                "Abre una lista de posts de ejemplo traídos desde internet (JSONPlaceholder). Sirve para probar GET, POST, PUT y DELETE.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Button(
+                onClick = { navController.navigate("posts") },
+                shape = RoundedCornerShape(14.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+            ) {
+                Text("Ver lista de posts (API demo)", fontWeight = FontWeight.SemiBold)
+            }
+        }
+
+        PrettyCard {
             SoftFieldAdmin(
                 value = estado.busqueda,
                 onValueChange = solicitudViewModel::onBusquedaChange,
