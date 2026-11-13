@@ -1,195 +1,113 @@
 # Gestión de Solicitudes
 
-App Android en **Kotlin + Jetpack Compose (Material 3)** para registrar, seguir y gestionar solicitudes de soporte.
+App Android con Kotlin y Jetpack Compose para manejar solicitudes.
 
-Incluye:
-
-- Almacenamiento local con **Room**
-- Lectura / generación de **códigos QR**
-- Consumo de **API REST** con Retrofit (Guía 14)
-- **Tests** unitarios y de UI (Guía 15)
-- Interfaz amable (paleta teal + coral, cards redondeadas, chips de estado)
-
-Repo: [YoditaGeGe/GestionSolicitudes](https://github.com/YoditaGeGe/GestionSolicitudes)
+También tiene una demo de API REST (Guía 14) y tests (Guía 15).
 
 ---
 
 ## Cuentas de prueba
 
-Clave para **todas**: `123456`
+Clave: `123456`
 
-| Correo | Perfil |
-|--------|--------|
-| `cliente@demo.cl` | Cliente |
-| `admin@demo.cl` | Administrador |
-| `tecnico@demo.cl` | Técnico |
+- `cliente@demo.cl`
+- `admin@demo.cl`
+- `tecnico@demo.cl`
 
 ---
 
-## Cómo correrla
+## Cómo abrirla
 
-1. Abre el proyecto en **Android Studio**
-2. Sync Gradle
-3. Elige un emulador o celular (con internet si vas a probar la API)
-4. Run ▶
+1. Abre el proyecto en Android Studio  
+2. Sync Gradle  
+3. Dale Run ▶  
 
-La app **inicia en el login**.
-
----
-
-## Roles y funciones
-
-### Cliente
-- Crear solicitudes (título, descripción, categoría, evidencia ficticia)
-- Ver listado de sus solicitudes con chips de estado
-- Ver detalle + historial + **QR** de la solicitud
-- Escanear un QR para abrir una solicitud
-
-### Administrador
-- Ver todas las solicitudes
-- Buscar por código o título
-- Filtros **desplegables**: Estado, Prioridad, Cliente, Responsable
-- Asignar técnico, definir prioridad, cambiar estados
-- Pedir información al cliente o cancelar
-- Generar / escanear QR
-- Abrir la **demo de API REST** (solo admin)
-
-### Técnico
-- Escanear QR para abrir solicitudes
-- Cerrar sesión
+Empieza en el **login**.
 
 ---
 
-## Guía 14 — API REST (demo)
+## Qué hace cada perfil
 
-Se consume la API pública **[JSONPlaceholder](https://jsonplaceholder.typicode.com/)**.
+**Cliente**
+- Crear solicitudes
+- Ver las suyas
+- Escanear QR
 
-La lista **no son solicitudes**: son **posts de prueba** (título + cuerpo) para demostrar conexión a internet.
+**Admin**
+- Ver todas
+- Filtrar / asignar / cambiar estado
+- Escanear QR
+- Abrir la demo de API (botón coral: `API demo · Posts`)
 
-### Cómo abrirla
-1. Inicia sesión como **admin** (`admin@demo.cl`)
-2. En el panel, tarjeta **API de prueba (Guía 14)**
-3. Botón **Ver lista de posts (API demo)**
-
-### Métodos HTTP en pantalla
-| Botón | Qué hace |
-|-------|----------|
-| **GET** | Vuelve a cargar la lista desde internet |
-| **POST** | Crea un post de prueba (simulado por la API) |
-| **PUT** | Edita el título del post (agrega “editado”) |
-| **DELETE** | Elimina el post de la lista local |
-
-### Archivos de la capa remote
-- `data/model/Post.kt`
-- `data/remote/ApiService.kt`
-- `data/remote/RetrofitInstance.kt`
-- `repository/PostRepository.kt`
-- `viewmodel/PostViewModel.kt`
-- `ui/screens/PostScreen.kt`
-
-Base URL: `https://jsonplaceholder.typicode.com`
+**Técnico**
+- Escanear QR
 
 ---
 
-## Guía 15 — Testing
+## Guía 14 — API de prueba
 
-Estrategia híbrida:
+Usa datos falsos de internet: [JSONPlaceholder](https://jsonplaceholder.typicode.com/)  
+(No son solicitudes reales, son posts de ejemplo.)
 
-| Tipo | Librerías | Archivos |
-|------|-----------|----------|
-| Unitario | Kotest + MockK + coroutines-test | `PostViewModelTest`, `PostRepositoryTest` |
-| UI | Compose UI Test + JUnit | `PostScreenTest` |
+Cómo entrar:
+1. Login como admin  
+2. Toca **API demo · Posts (GET/POST/PUT/DELETE)**  
 
-### Correr unit tests
+Botones:
+- **GET** → carga la lista  
+- **POST** → crea uno  
+- **PUT** → edita  
+- **DELETE** → borra  
+
+---
+
+## Guía 15 — Tests
+
+Correr unit tests:
 
 ```bash
 ./gradlew :app:testDebugUnitTest
 ```
 
-Si ves `BUILD SUCCESSFUL`, los tests unitarios pasaron.  
-Los `WARNING` de Gradle suelen ser normales y no indican fallo.
-
-El test de UI (`PostScreenTest`) se corre en emulador/dispositivo desde Android Studio.
-
----
-
-## Flujo de estados de una solicitud
-
-`Recibida` → `En revisión` → `Asignada` → `En proceso` → `Resuelta` → `Cerrada`
-
-También existen: `Pendiente de información` y `Cancelada`.
-
-Prioridades: Baja · Media · Alta · Urgente
-
----
-
-## Estructura del proyecto (MVVM)
-
-```
-app/src/main/java/com/example/gestionsolicitudes/
-├── MainActivity.kt
-├── navigation/
-│   └── AppNavigation.kt          # Rutas: login, paneles, posts, QR...
-├── data/
-│   ├── local/                    # Room (DB, DAOs, entities, mappers)
-│   ├── model/Post.kt             # Modelo API
-│   ├── remote/                   # ApiService + RetrofitInstance
-│   └── repository/SolicitudRepository.kt
-├── repository/PostRepository.kt
-├── model/                        # Solicitud, Usuario, UI state
-├── viewmodel/                    # Login, Solicitud, Post, Qr
-├── ui/
-│   ├── components/UiBits.kt      # SoftScreen, PrettyCard, SoftChip...
-│   ├── screen/                   # Login, Cliente, Admin, Detalle, QR...
-│   ├── screens/PostScreen.kt     # Pantalla demo API
-│   └── theme/                    # Colores, tipografía, tema
-└── utils/                        # Generar / escanear QR
-```
+Si sale `BUILD SUCCESSFUL`, está bien.
 
 Tests:
+- `PostViewModelTest`
+- `PostRepositoryTest`
+- `PostScreenTest` (este en emulador)
+
+---
+
+## Carpetas importantes
 
 ```
-app/src/test/.../viewmodel/PostViewModelTest.kt
-app/src/test/.../repository/PostRepositoryTest.kt
-app/src/androidTest/.../ui/screens/PostScreenTest.kt
+data/local      → Room (solicitudes)
+data/remote     → Retrofit (API)
+repository/     → PostRepository
+viewmodel/      → lógica
+ui/screen/      → pantallas de la app
+ui/screens/     → PostScreen (API)
 ```
 
 ---
 
-## Stack técnico
+## Comandos útiles
 
-- Kotlin · Jetpack Compose · Material 3
-- Navigation Compose
-- Room (+ KSP)
-- Retrofit 2.11 · Gson Converter
-- Kotlin Coroutines · StateFlow
-- CameraX · ML Kit Barcode · ZXing (QR)
-- Kotest · MockK · JUnit 5 · kotlinx-coroutines-test
-- Compose UI Test
+```bash
+# tests unitarios
+./gradlew :app:testDebugUnitTest
 
----
+# compilar
+./gradlew :app:assembleDebug
 
-## Interfaz
-
-- Paleta **teal + coral** (sin el púrpura por defecto de Material)
-- Fondos con degradado suave
-- Cards redondeadas
-- Chips de color según estado / prioridad
-- Filtros del admin en **acordeón** (se abren al tocar)
+# limpiar build
+./gradlew clean
+```
 
 ---
 
-## Guías Duoc UC aplicadas
+## Stack rápido
 
-| Guía | Tema | Estado |
-|------|------|--------|
-| **14** | Consumir API REST con Retrofit + MVVM + Compose | Implementada |
-| **15** | Tests unitarios (Kotest/MockK) y UI (Compose) | Implementada |
+Compose · Room · Retrofit · QR (CameraX + ML Kit) · Kotest · MockK
 
----
-
-## Notas
-
-- La demo de posts es **solo datos de prueba** de internet; el negocio real de la app son las **solicitudes** guardadas en Room.
-- Se necesita permiso `INTERNET` (ya declarado en el manifest).
-- Para Trello / capturas de consola de tests: parte colaborativa de las guías (manual).
+Repo: https://github.com/YoditaGeGe/GestionSolicitudes
