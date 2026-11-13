@@ -1,33 +1,40 @@
 package com.example.gestionsolicitudes.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.gestionsolicitudes.ui.components.PrettyCard
+import com.example.gestionsolicitudes.ui.components.SoftChip
+import com.example.gestionsolicitudes.ui.theme.CoralAccent
+import com.example.gestionsolicitudes.ui.theme.SoftBackground
+import com.example.gestionsolicitudes.ui.theme.TealContainer
+import com.example.gestionsolicitudes.ui.theme.TealPrimary
 import com.example.gestionsolicitudes.viewmodel.PostViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,79 +55,90 @@ fun PostScreen(
     }
 
     Scaffold(
+        containerColor = SoftBackground,
         topBar = {
             TopAppBar(
-                title = { Text(text = "Listado de Posts") },
+                title = {
+                    Column {
+                        Text("Posts desde la API", fontWeight = FontWeight.SemiBold)
+                        Text(
+                            "JSONPlaceholder · Guía 14",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                },
                 actions = {
                     if (onIrAGestion != null) {
                         TextButton(onClick = onIrAGestion) {
-                            Text("Gestión")
+                            Text("Gestión", color = TealPrimary, fontWeight = FontWeight.SemiBold)
                         }
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = TealContainer.copy(alpha = 0.65f)
+                )
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Button(onClick = { viewModel.refrescar() }) {
-                        Text("GET")
-                    }
-                    Button(onClick = { viewModel.crearPostDemo() }) {
-                        Text("POST")
-                    }
-                }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(
+                    onClick = { viewModel.refrescar() },
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.height(44.dp)
+                ) { Text("GET") }
+                Button(
+                    onClick = { viewModel.crearPostDemo() },
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = CoralAccent
+                    ),
+                    modifier = Modifier.height(44.dp)
+                ) { Text("POST") }
+            }
 
-                if (posts.isEmpty()) {
+            if (posts.isEmpty()) {
+                PrettyCard {
+                    Text("Cargando posts...", fontWeight = FontWeight.Medium)
                     Text(
-                        text = "Cargando posts...",
-                        modifier = Modifier.padding(16.dp),
-                        style = MaterialTheme.typography.bodyLarge
+                        "En un momento aparecen los datos de la API.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+            }
 
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp)
-                ) {
-                    items(posts) { post ->
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                        ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Text(
-                                    text = "Título: ${post.title}",
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = post.body,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    TextButton(onClick = { viewModel.actualizarPost(post) }) {
-                                        Text("PUT")
-                                    }
-                                    TextButton(onClick = { viewModel.eliminarPost(post) }) {
-                                        Text("DELETE")
-                                    }
-                                }
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                items(posts) { post ->
+                    PrettyCard {
+                        SoftChip("Usuario ${post.userId}", TealPrimary)
+                        Text(
+                            text = "Título: ${post.title}",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            text = post.body,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            OutlinedButton(
+                                onClick = { viewModel.actualizarPost(post) },
+                                shape = RoundedCornerShape(12.dp)
+                            ) { Text("PUT") }
+                            TextButton(onClick = { viewModel.eliminarPost(post) }) {
+                                Text("DELETE", color = CoralAccent)
                             }
                         }
                     }

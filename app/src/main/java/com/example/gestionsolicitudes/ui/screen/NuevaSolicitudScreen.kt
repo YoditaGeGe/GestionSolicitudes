@@ -4,15 +4,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,9 +20,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.gestionsolicitudes.model.Categoria
+import com.example.gestionsolicitudes.ui.components.PrettyCard
+import com.example.gestionsolicitudes.ui.components.ScreenHeader
+import com.example.gestionsolicitudes.ui.components.SectionLabel
+import com.example.gestionsolicitudes.ui.components.SoftScreen
 import com.example.gestionsolicitudes.viewmodel.LoginViewModel
 import com.example.gestionsolicitudes.viewmodel.SolicitudViewModel
 
@@ -48,93 +52,83 @@ fun NuevaSolicitudScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Text("Nueva solicitud", style = MaterialTheme.typography.headlineMedium)
-
-        OutlinedTextField(
-            value = form.titulo,
-            onValueChange = solicitudViewModel::onTituloChange,
-            label = { Text("Título") },
-            isError = form.errores.titulo != null,
-            supportingText = {
-                form.errores.titulo?.let {
-                    Text(text = it, color = MaterialTheme.colorScheme.error)
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
+    SoftScreen {
+        ScreenHeader(
+            title = "Nueva solicitud",
+            subtitle = "Cuéntanos qué necesitas, con calma"
         )
 
-        OutlinedTextField(
-            value = form.descripcion,
-            onValueChange = solicitudViewModel::onDescripcionChange,
-            label = { Text("Descripción de la necesidad") },
-            minLines = 3,
-            isError = form.errores.descripcion != null,
-            supportingText = {
-                form.errores.descripcion?.let {
-                    Text(text = it, color = MaterialTheme.colorScheme.error)
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        OutlinedTextField(
-            value = form.servicio,
-            onValueChange = solicitudViewModel::onServicioChange,
-            label = { Text("Servicio o sitio web relacionado (opcional)") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Text("Categoría", style = MaterialTheme.typography.titleMedium)
-        Categoria.entries.forEach { categoria ->
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { solicitudViewModel.onCategoriaChange(categoria) }
-            ) {
-                RadioButton(
-                    selected = form.categoria == categoria,
-                    onClick = { solicitudViewModel.onCategoriaChange(categoria) }
+        PrettyCard {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                SoftField(
+                    value = form.titulo,
+                    onValueChange = solicitudViewModel::onTituloChange,
+                    label = "Título",
+                    error = form.errores.titulo
                 )
-                Text(categoria.etiqueta)
+                SoftField(
+                    value = form.descripcion,
+                    onValueChange = solicitudViewModel::onDescripcionChange,
+                    label = "Descripción de la necesidad",
+                    error = form.errores.descripcion,
+                    minLines = 3
+                )
+                SoftField(
+                    value = form.servicio,
+                    onValueChange = solicitudViewModel::onServicioChange,
+                    label = "Servicio o sitio web (opcional)"
+                )
             }
         }
-        form.errores.categoria?.let {
-            Text(text = it, color = MaterialTheme.colorScheme.error)
+
+        PrettyCard {
+            SectionLabel("Categoría")
+            Categoria.entries.forEach { categoria ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { solicitudViewModel.onCategoriaChange(categoria) }
+                ) {
+                    RadioButton(
+                        selected = form.categoria == categoria,
+                        onClick = { solicitudViewModel.onCategoriaChange(categoria) }
+                    )
+                    Text(categoria.etiqueta)
+                }
+            }
+            form.errores.categoria?.let {
+                Text(text = it, color = MaterialTheme.colorScheme.error)
+            }
         }
 
-        Text("Evidencia (archivo ficticio)", style = MaterialTheme.typography.titleMedium)
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { solicitudViewModel.onEvidenciaChange(null) }
-        ) {
-            RadioButton(
-                selected = form.evidencia == null,
-                onClick = { solicitudViewModel.onEvidenciaChange(null) }
-            )
-            Text("Sin evidencia")
-        }
-        solicitudViewModel.evidenciasFicticias.forEach { archivo ->
+        PrettyCard {
+            SectionLabel("Evidencia (archivo ficticio)")
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { solicitudViewModel.onEvidenciaChange(archivo) }
+                    .clickable { solicitudViewModel.onEvidenciaChange(null) }
             ) {
                 RadioButton(
-                    selected = form.evidencia == archivo,
-                    onClick = { solicitudViewModel.onEvidenciaChange(archivo) }
+                    selected = form.evidencia == null,
+                    onClick = { solicitudViewModel.onEvidenciaChange(null) }
                 )
-                Text(archivo)
+                Text("Sin evidencia")
+            }
+            solicitudViewModel.evidenciasFicticias.forEach { archivo ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { solicitudViewModel.onEvidenciaChange(archivo) }
+                ) {
+                    RadioButton(
+                        selected = form.evidencia == archivo,
+                        onClick = { solicitudViewModel.onEvidenciaChange(archivo) }
+                    )
+                    Text(archivo)
+                }
             }
         }
 
@@ -145,16 +139,50 @@ fun NuevaSolicitudScreen(
                 }
             },
             enabled = usuario != null && !estado.guardando,
-            modifier = Modifier.fillMaxWidth()
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp)
         ) {
-            Text(if (estado.guardando) "Guardando..." else "Enviar solicitud")
+            Text(
+                if (estado.guardando) "Guardando..." else "Enviar solicitud",
+                fontWeight = FontWeight.SemiBold
+            )
         }
 
         OutlinedButton(
             onClick = { navController.popBackStack() },
+            shape = RoundedCornerShape(16.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Cancelar")
         }
     }
+}
+
+@Composable
+private fun SoftField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    error: String? = null,
+    minLines: Int = 1
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        minLines = minLines,
+        isError = error != null,
+        supportingText = {
+            error?.let { Text(text = it, color = MaterialTheme.colorScheme.error) }
+        },
+        shape = RoundedCornerShape(16.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+        ),
+        modifier = Modifier.fillMaxWidth()
+    )
 }
