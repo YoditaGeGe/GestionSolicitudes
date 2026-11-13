@@ -1,12 +1,17 @@
 package com.example.gestionsolicitudes.ui.screen
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -16,6 +21,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -68,43 +76,59 @@ fun InicioAdminScreen(
                 label = "Buscar por código o título"
             )
 
-            SectionLabel("Estado")
-            OpcionFiltro("Todos", estado.filtroEstado == null) {
-                solicitudViewModel.onFiltroEstado(null)
-            }
-            EstadoSolicitud.entries.forEach { opcion ->
-                OpcionFiltro(opcion.etiqueta, estado.filtroEstado == opcion) {
-                    solicitudViewModel.onFiltroEstado(opcion)
+            FiltroDesplegable(
+                titulo = "Estado",
+                valorActual = estado.filtroEstado?.etiqueta ?: "Todos"
+            ) {
+                OpcionFiltro("Todos", estado.filtroEstado == null) {
+                    solicitudViewModel.onFiltroEstado(null)
+                }
+                EstadoSolicitud.entries.forEach { opcion ->
+                    OpcionFiltro(opcion.etiqueta, estado.filtroEstado == opcion) {
+                        solicitudViewModel.onFiltroEstado(opcion)
+                    }
                 }
             }
 
-            SectionLabel("Prioridad")
-            OpcionFiltro("Todas", estado.filtroPrioridad == null) {
-                solicitudViewModel.onFiltroPrioridad(null)
-            }
-            Prioridad.entries.forEach { opcion ->
-                OpcionFiltro(opcion.etiqueta, estado.filtroPrioridad == opcion) {
-                    solicitudViewModel.onFiltroPrioridad(opcion)
+            FiltroDesplegable(
+                titulo = "Prioridad",
+                valorActual = estado.filtroPrioridad?.etiqueta ?: "Todas"
+            ) {
+                OpcionFiltro("Todas", estado.filtroPrioridad == null) {
+                    solicitudViewModel.onFiltroPrioridad(null)
+                }
+                Prioridad.entries.forEach { opcion ->
+                    OpcionFiltro(opcion.etiqueta, estado.filtroPrioridad == opcion) {
+                        solicitudViewModel.onFiltroPrioridad(opcion)
+                    }
                 }
             }
 
-            SectionLabel("Cliente")
-            OpcionFiltro("Todos", estado.filtroCliente == null) {
-                solicitudViewModel.onFiltroCliente(null)
-            }
-            estado.solicitudes.map { it.clienteNombre }.distinct().forEach { nombre ->
-                OpcionFiltro(nombre, estado.filtroCliente == nombre) {
-                    solicitudViewModel.onFiltroCliente(nombre)
+            FiltroDesplegable(
+                titulo = "Cliente",
+                valorActual = estado.filtroCliente ?: "Todos"
+            ) {
+                OpcionFiltro("Todos", estado.filtroCliente == null) {
+                    solicitudViewModel.onFiltroCliente(null)
+                }
+                estado.solicitudes.map { it.clienteNombre }.distinct().forEach { nombre ->
+                    OpcionFiltro(nombre, estado.filtroCliente == nombre) {
+                        solicitudViewModel.onFiltroCliente(nombre)
+                    }
                 }
             }
 
-            SectionLabel("Responsable")
-            OpcionFiltro("Todos", estado.filtroResponsable == null) {
-                solicitudViewModel.onFiltroResponsable(null)
-            }
-            estado.solicitudes.mapNotNull { it.responsable }.distinct().forEach { nombre ->
-                OpcionFiltro(nombre, estado.filtroResponsable == nombre) {
-                    solicitudViewModel.onFiltroResponsable(nombre)
+            FiltroDesplegable(
+                titulo = "Responsable",
+                valorActual = estado.filtroResponsable ?: "Todos"
+            ) {
+                OpcionFiltro("Todos", estado.filtroResponsable == null) {
+                    solicitudViewModel.onFiltroResponsable(null)
+                }
+                estado.solicitudes.mapNotNull { it.responsable }.distinct().forEach { nombre ->
+                    OpcionFiltro(nombre, estado.filtroResponsable == nombre) {
+                        solicitudViewModel.onFiltroResponsable(nombre)
+                    }
                 }
             }
 
@@ -349,6 +373,56 @@ private fun SoftFieldAdmin(
         ),
         modifier = Modifier.fillMaxWidth()
     )
+}
+
+@Composable
+private fun FiltroDesplegable(
+    titulo: String,
+    valorActual: String,
+    contenido: @Composable ColumnScope.() -> Unit
+) {
+    var abierto by rememberSaveable(titulo) { mutableStateOf(false) }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { abierto = !abierto }
+                .padding(vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = titulo,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = valorActual,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Text(
+                text = if (abierto) "▲" else "▼",
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        AnimatedVisibility(visible = abierto) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                content = contenido
+            )
+        }
+
+        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f))
+    }
 }
 
 @Composable
