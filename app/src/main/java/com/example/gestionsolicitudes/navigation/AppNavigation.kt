@@ -14,7 +14,9 @@ import com.example.gestionsolicitudes.ui.screen.LoginScreen
 import com.example.gestionsolicitudes.ui.screen.NuevaSolicitudScreen
 import com.example.gestionsolicitudes.model.Perfil
 import com.example.gestionsolicitudes.ui.screen.QrScannerRoute
+import com.example.gestionsolicitudes.ui.screens.PostScreen
 import com.example.gestionsolicitudes.viewmodel.LoginViewModel
+import com.example.gestionsolicitudes.viewmodel.PostViewModel
 import com.example.gestionsolicitudes.viewmodel.SolicitudViewModel
 
 @Composable
@@ -22,12 +24,19 @@ fun AppNavigation() {
     val navController = rememberNavController()
     val loginViewModel: LoginViewModel = viewModel()
     val solicitudViewModel: SolicitudViewModel = viewModel()
+    val postViewModel: PostViewModel = viewModel()
 
     NavHost(
         navController = navController,
         startDestination = "login"
     ) {
         composable("login") { LoginScreen(navController, loginViewModel) }
+        composable("posts") {
+            PostScreen(
+                viewModel = postViewModel,
+                onIrAGestion = { navController.popBackStack() }
+            )
+        }
         composable("cliente") { InicioClienteScreen(navController, loginViewModel, solicitudViewModel) }
         composable("nueva") { NuevaSolicitudScreen(navController, loginViewModel, solicitudViewModel) }
         composable("detalle") { DetalleSolicitudScreen(navController, solicitudViewModel) }

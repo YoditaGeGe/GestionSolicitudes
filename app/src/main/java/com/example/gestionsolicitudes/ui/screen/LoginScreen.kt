@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -120,6 +121,16 @@ fun LoginScreen(
                         .height(52.dp)
                 ) {
                     Text("Ingresar", fontWeight = FontWeight.SemiBold)
+                }
+
+                OutlinedButton(
+                    onClick = { navController.navigate("posts") },
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                ) {
+                    Text("Ver posts de la API")
                 }
             }
         }

@@ -71,7 +71,7 @@ fun PostScreen(
                 actions = {
                     if (onIrAGestion != null) {
                         TextButton(onClick = onIrAGestion) {
-                            Text("Gestión", color = TealPrimary, fontWeight = FontWeight.SemiBold)
+                            Text("Volver", color = TealPrimary, fontWeight = FontWeight.SemiBold)
                         }
                     }
                 },
